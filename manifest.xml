@@ -20,7 +20,7 @@
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/src/taskpane.html"/>
+    <SourceLocation DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -71,7 +71,7 @@
         <bt:Image id="Icon.80x80" DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/assets/icons/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/src/taskpane.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/taskpane.html"/>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://shwag-wsu.github.io/leanix-excel-addin/"/>
       </bt:Urls>
       <bt:ShortStrings>

@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        taskpane: resolve(__dirname, "src/taskpane.html")
+        taskpane: resolve(__dirname, "taskpane.html")
       }
     }
   }

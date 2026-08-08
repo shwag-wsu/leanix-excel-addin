@@ -48,7 +48,7 @@ If your repository name changes, update `base` in `vite.config.ts` and the URLs 
 The built task pane is served from:
 
 ```text
-https://shwag-wsu.github.io/leanix-excel-addin/src/taskpane.html
+https://shwag-wsu.github.io/leanix-excel-addin/taskpane.html
 ```
 
 ## LeanIX Login
