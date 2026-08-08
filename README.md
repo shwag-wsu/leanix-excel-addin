@@ -10,6 +10,7 @@ Implemented:
 - A test button that writes `LeanIX Add-in Connected` to cell `A1`.
 - A LeanIX authentication abstraction in `src/leanix/auth.ts`.
 - A placeholder browser OAuth provider that intentionally does not invent endpoints, client IDs, or secrets.
+- A LeanIX Custom Report bridge option that opens a LeanIX-hosted report in an Office dialog and receives JSON back.
 - A Storage API client that sends `Authorization: Bearer <access token>` once a supported auth provider is plugged in.
 - JSON display in the task pane.
 - Flat JSON array export to an Excel table named `LeanIXStorageData`.
@@ -71,6 +72,89 @@ That technical-user flow is not appropriate for this GitHub Pages browser add-in
 
 As of the documentation checked for this MVP, I found official support for user-based OAuth in SAP LeanIX custom report tools and MCP tooling, but not a documented, reusable Authorization Code + PKCE registration flow for arbitrary standalone browser or Office add-in clients. Therefore this project includes `LeanIXAuthProvider` and `BrowserOAuthPlaceholderAuthProvider`, but does not implement OAuth endpoints or copy `lxr` credentials.
 
+## LeanIX Custom Report Bridge
+
+The practical workaround is to host a small bridge page as a SAP LeanIX Custom Report. The Excel task pane stays on GitHub Pages, but it opens that LeanIX-hosted report with `Office.context.ui.displayDialogAsync`. The custom report runs inside LeanIX's supported user-authenticated context, retrieves the configured Storage API object, and sends only the resulting JSON back to Excel.
+
+Recommended flow:
+
+```text
+Excel task pane
+  -> opens LeanIX custom report bridge
+  -> LeanIX-hosted report uses LeanIX-supported user context
+  -> report retrieves one Storage API object
+  -> report sends JSON back to Excel
+  -> Excel displays JSON and writes a flat array to a worksheet table
+```
+
+Configure the bridge URL in `src/leanix/config.ts`:
+
+```typescript
+export const leanixConfig = {
+  baseUrl: "https://YOUR-SUBDOMAIN.leanix.net",
+  workspace: "YOUR-WORKSPACE",
+  storageObjectId: "/services/...",
+  customReportBridgeUrl: "https://YOUR-SUBDOMAIN.leanix.net/path/to/custom/report"
+};
+```
+
+The Excel task pane calls the bridge with query parameters:
+
+```text
+?source=leanix-storage-explorer
+&action=connect
+&returnOrigin=https://shwag-wsu.github.io
+```
+
+or:
+
+```text
+?source=leanix-storage-explorer
+&action=getObject
+&objectId=/services/...
+&returnOrigin=https://shwag-wsu.github.io
+```
+
+The LeanIX custom report should include Office.js when opened as an Office dialog, then call `Office.context.ui.messageParent(...)`.
+
+For connection confirmation:
+
+```typescript
+Office.context.ui.messageParent(JSON.stringify({
+  source: "leanix-storage-explorer-bridge",
+  type: "connection",
+  workspace: "YOUR-WORKSPACE"
+}));
+```
+
+For a retrieved Storage API object:
+
+```typescript
+Office.context.ui.messageParent(JSON.stringify({
+  source: "leanix-storage-explorer-bridge",
+  type: "storageObject",
+  payload: [
+    {
+      application: "App A",
+      platform: "Azure",
+      activeFrom: "2025-01-01"
+    }
+  ]
+}));
+```
+
+For errors:
+
+```typescript
+Office.context.ui.messageParent(JSON.stringify({
+  source: "leanix-storage-explorer-bridge",
+  type: "error",
+  message: "Unable to retrieve the storage object."
+}));
+```
+
+Do not send LeanIX access tokens back to Excel unless SAP explicitly documents that as supported. The bridge should send retrieved data, not credentials.
+
 Sources:
 
 - SAP Help Portal, Set Up Your Custom Reports Project: https://help.sap.com/docs/leanix/ea/setting-up-your-custom-reports-project
@@ -92,7 +176,8 @@ Edit non-secret settings in `src/leanix/config.ts`:
 export const leanixConfig = {
   baseUrl: "https://YOUR-SUBDOMAIN.leanix.net",
   workspace: "YOUR-WORKSPACE",
-  storageObjectId: "/services/..."
+  storageObjectId: "/services/...",
+  customReportBridgeUrl: "https://YOUR-SUBDOMAIN.leanix.net/path/to/custom/report"
 };
 ```
 
@@ -133,11 +218,25 @@ Phase 1 smoke test:
 After a supported LeanIX browser auth provider is implemented:
 
 1. Configure `src/leanix/config.ts`.
-2. Click `Sign in to LeanIX`.
-3. Retrieve one Storage API object.
-4. Confirm the JSON appears in the task pane.
-5. If the JSON is a flat array of objects, click `Write to Worksheet`.
-6. Confirm an Excel table appears.
+2. If using the custom report bridge, set `customReportBridgeUrl`.
+3. Click `Sign in to LeanIX`.
+4. Retrieve one Storage API object.
+5. Confirm the JSON appears in the task pane.
+6. If the JSON is a flat array of objects, click `Write to Worksheet`.
+7. Confirm an Excel table appears.
+
+With the custom report bridge:
+
+1. Deploy the LeanIX custom report bridge in SAP LeanIX.
+2. Set `customReportBridgeUrl`.
+3. Rebuild and deploy the GitHub Pages task pane.
+4. Sideload `manifest.xml`.
+5. Click `Sign in to LeanIX`.
+6. Confirm the LeanIX-hosted report returns a connection message.
+7. Retrieve one Storage API object through the bridge.
+8. Confirm the JSON appears in the task pane.
+9. If the JSON is a flat array of objects, click `Write to Worksheet`.
+10. Confirm an Excel table appears.
 
 ## Security
 

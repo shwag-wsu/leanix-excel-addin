@@ -2,14 +2,18 @@ import "./styles.css";
 import { writeJsonArrayToWorksheet, writeTestCell } from "./excel";
 import { BrowserOAuthPlaceholderAuthProvider } from "./leanix/auth";
 import { leanixConfig } from "./leanix/config";
+import { LeanIXCustomReportBridge } from "./leanix/report-bridge";
 import { LeanIXStorageClient } from "./leanix/storage-client";
 
 const authProvider = new BrowserOAuthPlaceholderAuthProvider();
 const storageClient = new LeanIXStorageClient(leanixConfig.baseUrl, () =>
   authProvider.getAccessToken()
 );
+const reportBridge = new LeanIXCustomReportBridge(leanixConfig.customReportBridgeUrl);
 
 let retrievedJson: unknown;
+let connectedWorkspace = "";
+let isConnected = false;
 let officeReady = false;
 
 const elements = {
@@ -40,8 +44,12 @@ Office.onReady((info) => {
 
 elements.signInButton.addEventListener("click", async () => {
   await runAction(async () => {
-    await authProvider.login();
+    setMessage("Opening LeanIX custom report bridge...");
+    const connection = await reportBridge.connect();
+    connectedWorkspace = connection.workspace ?? leanixConfig.workspace;
+    isConnected = true;
     await updateAuthUi();
+    setMessage("Connected through the LeanIX custom report bridge.");
   });
 });
 
@@ -49,6 +57,8 @@ elements.signOutButton.addEventListener("click", async () => {
   await runAction(async () => {
     await authProvider.logout();
     retrievedJson = undefined;
+    connectedWorkspace = "";
+    isConnected = false;
     elements.writeButton.disabled = true;
     await updateAuthUi();
     setMessage("Signed out.");
@@ -58,7 +68,9 @@ elements.signOutButton.addEventListener("click", async () => {
 elements.retrieveButton.addEventListener("click", async () => {
   await runAction(async () => {
     setMessage("Retrieving LeanIX storage object...");
-    retrievedJson = await storageClient.getObject(elements.objectIdInput.value.trim());
+    retrievedJson = leanixConfig.customReportBridgeUrl
+      ? await reportBridge.getObject(elements.objectIdInput.value.trim())
+      : await storageClient.getObject(elements.objectIdInput.value.trim());
     elements.resultOutput.textContent = JSON.stringify(retrievedJson, null, 2);
     elements.writeButton.disabled = !officeReady;
     setMessage("Object retrieved.");
@@ -80,11 +92,11 @@ elements.testWriteButton.addEventListener("click", async () => {
 });
 
 async function updateAuthUi(): Promise<void> {
-  const authenticated = await authProvider.isAuthenticated();
+  const authenticated = isConnected || (await authProvider.isAuthenticated());
   elements.authStatus.textContent = authenticated ? "Connected to LeanIX" : "Not signed in";
   elements.workspaceStatus.textContent =
-    authenticated && leanixConfig.workspace
-      ? `Workspace: ${leanixConfig.workspace}`
+    authenticated && (connectedWorkspace || leanixConfig.workspace)
+      ? `Workspace: ${connectedWorkspace || leanixConfig.workspace}`
       : "Not connected";
   elements.signInButton.hidden = authenticated;
   elements.signOutButton.hidden = !authenticated;

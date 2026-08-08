@@ -1,5 +1,6 @@
 export const leanixConfig = {
   baseUrl: "",
   workspace: "",
-  storageObjectId: ""
+  storageObjectId: "",
+  customReportBridgeUrl: ""
 };
