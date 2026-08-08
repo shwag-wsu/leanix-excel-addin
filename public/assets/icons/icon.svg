@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80" role="img" aria-label="LeanIX Storage Explorer icon">
+  <rect width="80" height="80" rx="12" fill="#2563eb"/>
+  <path d="M20 22h40v12H20zM20 38h40v20H20z" fill="#ffffff"/>
+  <path d="M28 46h24M28 52h14" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,95 @@
+:root {
+  color: #1f2933;
+  background: #f7f9fb;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+}
+
+.pane {
+  box-sizing: border-box;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+h2,
+label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+section {
+  border-top: 1px solid #d9e1ea;
+  padding: 14px 0;
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+input,
+button,
+pre {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+input {
+  height: 34px;
+  border: 1px solid #b8c4d2;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font: inherit;
+  background: #fff;
+}
+
+button {
+  min-height: 34px;
+  margin-top: 8px;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  padding: 7px 10px;
+  background: #2563eb;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  border-color: #aab7c4;
+  background: #d7dee7;
+  color: #5f6c7b;
+  cursor: not-allowed;
+}
+
+pre {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid #d9e1ea;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fff;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#message {
+  min-height: 20px;
+  color: #475467;
+}
