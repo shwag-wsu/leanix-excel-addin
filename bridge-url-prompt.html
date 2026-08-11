@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeanIX Bridge URL</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script type="module" src="/src/bridge-url-prompt.ts"></script>
+  </head>
+  <body>
+    <main class="pane dialog-pane">
+      <h1>LeanIX Login</h1>
+
+      <form id="bridge-url-form">
+        <label for="custom-report-bridge-url">Custom Report Bridge URL</label>
+        <input
+          id="custom-report-bridge-url"
+          type="url"
+          placeholder="https://your-workspace.leanix.net/..."
+          autocomplete="url"
+          required
+        />
+        <button type="submit">Continue</button>
+        <button id="cancel-button" class="secondary-button" type="button">Cancel</button>
+      </form>
+
+      <p id="message" role="status"></p>
+    </main>
+  </body>
+</html>

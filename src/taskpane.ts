@@ -1,15 +1,17 @@
 import "./styles.css";
 import { writeJsonArrayToWorksheet, writeTestCell } from "./excel";
+import { promptForCustomReportBridgeUrl } from "./leanix/bridge-url-prompt";
 import { BrowserOAuthPlaceholderAuthProvider } from "./leanix/auth";
-import { leanixConfig } from "./leanix/config";
 import { LeanIXCustomReportBridge } from "./leanix/report-bridge";
+import { loadRuntimeConfig, saveCustomReportBridgeUrl } from "./leanix/runtime-config";
 import { LeanIXStorageClient } from "./leanix/storage-client";
 
 const authProvider = new BrowserOAuthPlaceholderAuthProvider();
-const storageClient = new LeanIXStorageClient(leanixConfig.baseUrl, () =>
+let runtimeConfig = loadRuntimeConfig();
+const storageClient = new LeanIXStorageClient(runtimeConfig.baseUrl, () =>
   authProvider.getAccessToken()
 );
-const reportBridge = new LeanIXCustomReportBridge(leanixConfig.customReportBridgeUrl);
+const reportBridge = new LeanIXCustomReportBridge(runtimeConfig.customReportBridgeUrl);
 
 let retrievedJson: unknown;
 let connectedWorkspace = "";
@@ -33,7 +35,7 @@ Office.onReady((info) => {
   officeReady = info.host === Office.HostType.Excel;
   elements.testWriteButton.disabled = !officeReady;
   elements.retrieveButton.disabled = false;
-  elements.objectIdInput.value = leanixConfig.storageObjectId;
+  elements.objectIdInput.value = runtimeConfig.storageObjectId;
   updateAuthUi();
   setMessage(
     officeReady
@@ -44,9 +46,17 @@ Office.onReady((info) => {
 
 elements.signInButton.addEventListener("click", async () => {
   await runAction(async () => {
+    setMessage("Requesting LeanIX custom report bridge URL...");
+    const customReportBridgeUrl = await promptForCustomReportBridgeUrl(
+      runtimeConfig.customReportBridgeUrl
+    );
+    runtimeConfig = saveCustomReportBridgeUrl(customReportBridgeUrl);
+    storageClient.setBaseUrl(runtimeConfig.baseUrl);
+    reportBridge.setBridgeUrl(runtimeConfig.customReportBridgeUrl);
+
     setMessage("Opening LeanIX custom report bridge...");
     const connection = await reportBridge.connect();
-    connectedWorkspace = connection.workspace ?? leanixConfig.workspace;
+    connectedWorkspace = connection.workspace ?? runtimeConfig.workspace;
     isConnected = true;
     await updateAuthUi();
     setMessage("Connected through the LeanIX custom report bridge.");
@@ -68,7 +78,7 @@ elements.signOutButton.addEventListener("click", async () => {
 elements.retrieveButton.addEventListener("click", async () => {
   await runAction(async () => {
     setMessage("Retrieving LeanIX storage object...");
-    retrievedJson = leanixConfig.customReportBridgeUrl
+    retrievedJson = runtimeConfig.customReportBridgeUrl
       ? await reportBridge.getObject(elements.objectIdInput.value.trim())
       : await storageClient.getObject(elements.objectIdInput.value.trim());
     elements.resultOutput.textContent = JSON.stringify(retrievedJson, null, 2);
@@ -95,9 +105,11 @@ async function updateAuthUi(): Promise<void> {
   const authenticated = isConnected || (await authProvider.isAuthenticated());
   elements.authStatus.textContent = authenticated ? "Connected to LeanIX" : "Not signed in";
   elements.workspaceStatus.textContent =
-    authenticated && (connectedWorkspace || leanixConfig.workspace)
-      ? `Workspace: ${connectedWorkspace || leanixConfig.workspace}`
-      : "Not connected";
+    authenticated && (connectedWorkspace || runtimeConfig.workspace)
+      ? `Workspace: ${connectedWorkspace || runtimeConfig.workspace}`
+      : runtimeConfig.baseUrl
+        ? `Base URL: ${runtimeConfig.baseUrl}`
+        : "Not connected";
   elements.signInButton.hidden = authenticated;
   elements.signOutButton.hidden = !authenticated;
 }

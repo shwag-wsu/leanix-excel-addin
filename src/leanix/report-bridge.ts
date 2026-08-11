@@ -24,7 +24,11 @@ type BridgeMessage =
     };
 
 export class LeanIXCustomReportBridge {
-  constructor(private readonly bridgeUrl: string) {}
+  constructor(private bridgeUrl: string) {}
+
+  setBridgeUrl(bridgeUrl: string): void {
+    this.bridgeUrl = bridgeUrl;
+  }
 
   async connect(): Promise<LeanIXBridgeConnection> {
     const message = await this.openBridge({ action: "connect" });

@@ -16,6 +16,10 @@ body {
   padding: 16px;
 }
 
+.dialog-pane {
+  max-width: none;
+}
+
 h1 {
   margin: 0 0 18px;
   font-size: 20px;
@@ -74,6 +78,12 @@ button:disabled {
   background: #d7dee7;
   color: #5f6c7b;
   cursor: not-allowed;
+}
+
+.secondary-button {
+  border-color: #b8c4d2;
+  background: #fff;
+  color: #344054;
 }
 
 pre {

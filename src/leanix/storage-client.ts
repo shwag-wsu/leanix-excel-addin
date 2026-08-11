@@ -1,8 +1,12 @@
 export class LeanIXStorageClient {
   constructor(
-    private readonly baseUrl: string,
+    private baseUrl: string,
     private readonly getAccessToken: () => Promise<string>
   ) {}
+
+  setBaseUrl(baseUrl: string): void {
+    this.baseUrl = baseUrl;
+  }
 
   async getObject(objectId: string): Promise<unknown> {
     const url = this.buildStorageUrl(objectId);
