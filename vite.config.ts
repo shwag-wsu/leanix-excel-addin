@@ -6,6 +6,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        bridgeRedirect: resolve(__dirname, "bridge-redirect.html"),
         bridgeUrlPrompt: resolve(__dirname, "bridge-url-prompt.html"),
         taskpane: resolve(__dirname, "taskpane.html")
       }

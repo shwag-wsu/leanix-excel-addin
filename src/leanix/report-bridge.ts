@@ -66,9 +66,12 @@ export class LeanIXCustomReportBridge {
       url.searchParams.set("objectId", request.objectId);
     }
 
+    const dialogUrl = new URL("bridge-redirect.html", window.location.href);
+    dialogUrl.searchParams.set("target", url.toString());
+
     return new Promise((resolve, reject) => {
       Office.context.ui.displayDialogAsync(
-        url.toString(),
+        dialogUrl.toString(),
         { height: 60, width: 50, displayInIframe: false },
         (result) => {
           if (result.status !== Office.AsyncResultStatus.Succeeded) {
